@@ -5,7 +5,22 @@ import streamlit as st
 
 st.set_page_config(page_title="E-Commerce Sales Analysis", layout="wide")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-master = pd.read_csv(os.path.join(BASE_DIR, 'data', 'cleaned', 'master.csv'), parse_dates=['order_purchase_timestamp'])
+
+raw = os.path.join(BASE_DIR, 'data', 'raw')
+
+orders = pd.read_csv(os.path.join(raw, 'olist_orders_dataset.csv'))
+items = pd.read_csv(os.path.join(raw, 'olist_order_items_dataset.csv'))
+payments = pd.read_csv(os.path.join(raw, 'olist_order_payments_dataset.csv'))
+products = pd.read_csv(os.path.join(raw, 'olist_products_dataset.csv'))
+customers = pd.read_csv(os.path.join(raw, 'olist_customers_dataset.csv'))
+
+orders = orders[orders['order_status'] == 'delivered']
+orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'])
+
+master = orders.merge(items, on='order_id', how='left')
+master = master.merge(payments, on='order_id', how='left')
+master = master.merge(products, on='product_id', how='left')
+master = master.merge(customers, on='customer_id', how='left')
 
 st.title("E-Commerce Sales Dashboard")
 
